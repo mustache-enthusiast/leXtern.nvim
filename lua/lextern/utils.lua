@@ -69,5 +69,54 @@ end
 
 
 
+-- Find the path to the template.svg file
+-- Returns absolute path to template, or nil if not found
+function M.get_template_path()
+  -- Get the plugin's installation directory from Neovim's runtimepath
+  local rtp = vim.api.nvim_list_runtime_paths()
+  
+  for _, path in ipairs(rtp) do
+    if path:match("leXtern%.nvim") then
+      local template_path = path .. "/templates/template.svg"
+      
+      -- Check if the template actually exists
+      if vim.fn.filereadable(template_path) == 1 then
+        return template_path
+      end
+    end
+  end
+  
+  -- Template not found
+  return nil
+end
+
+
+--Copy the .svg file to the necessary location
+
+function M.copy_template(dest_path)
+    
+    local template_path = M.get_template_path()
+    if not template_path then
+        return nil
+    end
+
+    local template_file = io.open(template_path, "r")
+    if not template_file then
+        return nil
+    end
+    local template_content = template_file:read("*all")
+    template_file:close()
+
+    local target_file = io.open(dest_path, "w")
+    if not target_file then
+        return nil
+    end
+    target_file:write(template_content)
+    target_file:close()
+
+    return true
+end
+
+
 
 return M
