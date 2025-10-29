@@ -49,27 +49,22 @@ vim.api.nvim_create_user_command('LeXternCopyTest', function()
   end
 end, { nargs = 0 })
 
--- Test figure_exists
-vim.api.nvim_create_user_command('LeXternExists', function(opts)
+-- Test figure_path
+vim.api.nvim_create_user_command('LeXternPath', function(opts)
   local utils = require('lextern.utils')
   local dir = utils.get_figures_dir()
   
   if not dir then
-    print("✗ No figures directory found (no file open)")
+    print("✗ No figures directory found")
     return
   end
   
   local filename = opts.args
-  if filename == "" then
-    print("Usage: :LeXternExists <filename>")
-    return
-  end
+  local path = utils.figure_path(dir, filename)
   
-  local exists = utils.figure_exists(dir, filename)
-  
-  if exists then
-    print(string.format('✓ Figure "%s.svg" exists in %s', filename, dir))
+  if path then
+    print(string.format('✓ Figure path: %s', path))
   else
-    print(string.format('✗ Figure "%s.svg" does not exist in %s', filename, dir))
+    print(string.format('✗ Figure "%s.svg" does not exist', filename))
   end
 end, { nargs = 1 })
