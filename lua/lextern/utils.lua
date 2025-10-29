@@ -117,6 +117,10 @@ function M.copy_template(dest_path)
     return true
 end
 
-
+--Check for pre-existing files
+function M.figure_exists(figures_dir, filename)
+    local fig_path = figures_dir .. "/" .. filename .. ".svg"
+    return vim.fn.filereadable(fig_path) == 1
+end
 
 return M
