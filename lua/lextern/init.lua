@@ -1,22 +1,49 @@
 local M = {}
 
--- Default configuration
-local default_config = {
-  figures_dir = "figures",  -- Relative to tex file, or absolute path
-  template_path = vim.fn.stdpath('config') .. '/lextern/template.svg',
-}
-
--- This will hold the actual config (defaults merged with user settings)
-M.config = {}
+local utils = require('lextern.utils')
 
 function M.setup(opts)
   opts = opts or {}
-  
-  -- Merge user options with defaults
-  -- vim.tbl_deep_extend merges tables, "force" means user opts override defaults
-  M.config = vim.tbl_deep_extend("force", default_config, opts)
-  
   print("leXtern.nvim loaded!")
+end
+
+function M.create_figure(title)
+
+    local target_filename = utils.sanitize_filename(title)
+    if not target_filename then
+        vim.notify("Error: '" .. title .. "' is not a valid file name.", vim.log.levels.WARN)
+        return nil
+    end
+
+    local target_dir = utils.get_figures_dir()
+    if not target_dir then
+        vim.notify("Error: target directory not found.", vim.log.levels.WARN)
+        return nil
+    end
+
+    local target_path = utils.figure_path(target_dir, target_filename)
+    if utils.figure_exists(target_path) then
+        vim.notify("Error: '" .. target_path .. "' already exists.", vim.log.levels.WARN)
+        return nil
+    end
+
+    local copy_success = utils.copy_template(target_path)
+    if not copy_success then
+        vim.notify("Error: SVG template could not be created", vim.log.levels.ERROR)
+        return nil
+    end
+    
+    if not utils.figure_exists(target_path) then
+        vim.notify("Error: '" .. target_path .. "'  was not created.", vim.log.levels.ERROR)
+        return nil
+    end
+    local incfig_code = string.format("\\incfig{%s}", target_filename)
+    utils.insert_at_cursor(incfig_code)
+
+    utils.open_inkscape(target_path)
+
+    return true
+
 end
 
 return M

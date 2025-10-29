@@ -94,3 +94,19 @@ vim.api.nvim_create_user_command('LeXternInsert', function(opts)
   
   utils.insert_at_cursor(text)
 end, { nargs = '?' })  -- '?' = optional argument
+
+-- Main create figure command
+vim.api.nvim_create_user_command('LeXternCreate', function(opts)
+  local lextern = require('lextern')
+  
+  local title = opts.args
+  if title == "" then
+    vim.ui.input({ prompt = "Figure title: " }, function(input)
+      if input and input ~= "" then
+        lextern.create_figure(input)
+      end
+    end)
+  else
+    lextern.create_figure(title)
+  end
+end, { nargs = '?' })

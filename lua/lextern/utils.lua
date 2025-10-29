@@ -120,10 +120,11 @@ end
 --Check for pre-existing files
 function M.figure_path(figures_dir, filename)
     local fig_path = figures_dir .. "/" .. filename .. ".svg"
-    if vim.fn.filereadable(fig_path) == 0 then
-        return nil
-    end
     return vim.fn.fnamemodify(fig_path, ":p")
+end
+
+function M.figure_exists(target_file_path)
+    return vim.fn.filereadable(target_file_path)==1
 end
 
 --Open Inkscape in background
