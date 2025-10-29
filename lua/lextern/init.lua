@@ -46,4 +46,33 @@ function M.create_figure(title)
 
 end
 
+
+function M.edit_figure()
+    
+    local target_dir = utils.get_figures_dir()
+    if not target_dir then
+        vim.notify("Error: target directory not found.", vim.log.levels.WARN)
+        return nil
+    end
+    
+    local figures_list = utils.list_figures(target_dir)
+    if #figures_list == 0 then
+        vim.notify("No figures found in: " .. target_dir, vim.log.levels.INFO)
+        return nil
+    end
+
+    vim.ui.select(figures_list,
+        { prompt = "Select a figure:" },
+        function(target_file, idx)
+            if not target_file then
+                return
+            end
+            local target_path = utils.figure_path(target_dir, target_file)
+
+            utils.open_inkscape(target_path)
+            vim.notify("Opening " .. target_file, vim.log.levels.INFO)
+        end
+    )
+end
+
 return M

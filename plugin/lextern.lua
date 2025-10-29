@@ -132,3 +132,9 @@ vim.api.nvim_create_user_command('LeXternList', function()
     end
   end
 end, { nargs = 0 })
+
+-- Edit figure command
+vim.api.nvim_create_user_command('LeXternEdit', function()
+  local lextern = require('lextern')
+  lextern.edit_figure()
+end, { nargs = 0 })
