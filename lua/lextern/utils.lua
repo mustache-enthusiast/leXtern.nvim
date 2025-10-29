@@ -126,4 +126,10 @@ function M.figure_path(figures_dir, filename)
     return vim.fn.fnamemodify(fig_path, ":p")
 end
 
+--Open Inkscape in background
+function M.open_inkscape(target_file_path)
+    local open_command = string.format('inkscape "%s" &', target_file_path)
+    vim.fn.system(open_command)
+end
+
 return M

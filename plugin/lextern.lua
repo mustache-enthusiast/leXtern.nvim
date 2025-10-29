@@ -68,3 +68,17 @@ vim.api.nvim_create_user_command('LeXternPath', function(opts)
     print(string.format('✗ Figure "%s.svg" does not exist', filename))
   end
 end, { nargs = 1 })
+
+-- Test open_inkscape
+vim.api.nvim_create_user_command('LeXternOpen', function(opts)
+  local utils = require('lextern.utils')
+  
+  local filepath = opts.args
+  if filepath == "" then
+    print("Usage: :LeXternOpen <filepath>")
+    return
+  end
+  
+  utils.open_inkscape(filepath)
+  print(string.format("Opening Inkscape with: %s", filepath))
+end, { nargs = 1 })
