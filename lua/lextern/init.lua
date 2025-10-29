@@ -27,18 +27,25 @@ function M.create_figure(title)
         return nil
     end
 
-    local copy_success = utils.copy_template(target_path)
-    if not copy_success then
-        vim.notify("Error: SVG template could not be created", vim.log.levels.ERROR)
+    local success, err = utils.write_template(target_path, "template.svg")
+    if not success then
+        vim.notify("Error: " .. (err or "SVG template could not be created"), vim.log.levels.ERROR)
         return nil
     end
-    
+
     if not utils.figure_exists(target_path) then
         vim.notify("Error: '" .. target_path .. "'  was not created.", vim.log.levels.ERROR)
         return nil
     end
-    local incfig_code = string.format("\\incfig{%s}", target_filename)
-    utils.insert_at_cursor(incfig_code)
+
+    -- Generate full figure environment
+    local figure_env, err = utils.generate_figure_environment(target_filename, title)
+    if not figure_env then
+        vim.notify("Error: " .. err, vim.log.levels.ERROR)
+        return nil
+    end
+
+    utils.insert_at_cursor(figure_env)
 
     utils.open_inkscape(target_path)
 
@@ -71,6 +78,16 @@ function M.edit_figure()
 
             utils.open_inkscape(target_path)
             vim.notify("Opening " .. target_file, vim.log.levels.INFO)
+            utils.open_inkscape(target_path)
+
+            -- Copy figure code to register for easy pasting
+            local figure_env, err = utils.generate_figure_environment(target_file, target_file)
+            if figure_env then
+                utils.copy_to_register(figure_env)
+                vim.notify("Figure opened. Code copied to register - press 'p' to paste.", vim.log.levels.INFO)
+            else
+                vim.notify("Figure opened (code generation failed: " .. err .. ")", vim.log.levels.WARN)
+            end
         end
     )
 end
