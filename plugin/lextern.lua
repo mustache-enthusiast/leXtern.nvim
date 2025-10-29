@@ -200,3 +200,17 @@ vim.api.nvim_create_user_command('LeXternTestGenerateFigure', function(opts)
     print(result)
   end
 end, { nargs = '?' })
+
+-- Test copy_to_register
+vim.api.nvim_create_user_command('LeXternTestRegister', function(opts)
+  local utils = require('lextern.utils')
+  local text = opts.args
+  
+  if text == "" then
+    text = "Test content\nLine 2\nLine 3"
+  end
+  
+  utils.copy_to_register(text)
+  print('✓ Copied to register "')
+  print('Try: press p to paste')
+end, { nargs = '?' })
