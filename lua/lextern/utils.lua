@@ -141,7 +141,8 @@ end
 
 -- Insert text at cursor position as a new line
 function M.insert_at_cursor(text)
-  vim.api.nvim_put({text}, 'l', true, true)
+    local lines = vim.split(text, "\n", { plain = true })
+    vim.api.nvim_put(lines, 'l', true, true)
 end
 
 --get list of available figures
