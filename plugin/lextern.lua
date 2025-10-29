@@ -82,3 +82,15 @@ vim.api.nvim_create_user_command('LeXternOpen', function(opts)
   utils.open_inkscape(filepath)
   print(string.format("Opening Inkscape with: %s", filepath))
 end, { nargs = 1 })
+
+-- Test insert_at_cursor
+vim.api.nvim_create_user_command('LeXternInsert', function(opts)
+  local utils = require('lextern.utils')
+  local text = opts.args
+  
+  if text == "" then
+    text = "\\incfig{test-figure}"
+  end
+  
+  utils.insert_at_cursor(text)
+end, { nargs = '?' })  -- '?' = optional argument

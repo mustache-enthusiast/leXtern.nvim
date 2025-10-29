@@ -132,4 +132,9 @@ function M.open_inkscape(target_file_path)
     vim.fn.system(open_command)
 end
 
+-- Insert text at cursor position as a new line
+function M.insert_at_cursor(text)
+  vim.api.nvim_put({text}, 'l', true, true)
+end
+
 return M
