@@ -175,4 +175,9 @@ function M.generate_figure_environment(filename, caption)
     return result
 end
 
+function M.copy_to_register(text, register)
+    register = register or '"'
+    vim.fn.setreg(register, text)
+end
+
 return M
