@@ -138,3 +138,65 @@ vim.api.nvim_create_user_command('LeXternEdit', function()
   local lextern = require('lextern')
   lextern.edit_figure()
 end, { nargs = 0 })
+
+-- Test get_template
+vim.api.nvim_create_user_command('LeXternTestGetTemplate', function(opts)
+  local utils = require('lextern.utils')
+  local template_name = opts.args
+  
+  if template_name == "" then
+    print("Usage: :LeXternTestGetTemplate <template_name>")
+    print("Examples: template.svg, preamble.tex, figure.tex")
+    return
+  end
+  
+  local content, err = utils.get_template(template_name)
+  
+  if not content then
+    print("✗ Error: " .. err)
+  else
+    print("✓ Template found:")
+    print(string.format("  Length: %d bytes", #content))
+    print("  First 100 chars: " .. content:sub(1, 100))
+  end
+end, { nargs = 1 })
+
+-- Test write_template
+vim.api.nvim_create_user_command('LeXternTestWriteTemplate', function()
+  local utils = require('lextern.utils')
+  local dest = "/tmp/lextern-test-output.txt"
+  
+  local success, err = utils.write_template(dest, "preamble.tex")
+  
+  if not success then
+    print("✗ Error: " .. err)
+  else
+    print("✓ Template written to: " .. dest)
+    print("  Run: cat " .. dest)
+  end
+end, { nargs = 0 })
+
+-- Test generate_figure_environment
+vim.api.nvim_create_user_command('LeXternTestGenerateFigure', function(opts)
+  local utils = require('lextern.utils')
+  
+  -- Default test values
+  local filename = "test-figure"
+  local caption = "Test Figure Caption"
+  
+  -- Or use args if provided
+  if opts.args ~= "" then
+    local parts = vim.split(opts.args, ",")
+    filename = parts[1] or filename
+    caption = parts[2] or caption
+  end
+  
+  local result, err = utils.generate_figure_environment(filename, caption)
+  
+  if not result then
+    print("✗ Error: " .. err)
+  else
+    print("✓ Generated figure environment:")
+    print(result)
+  end
+end, { nargs = '?' })
