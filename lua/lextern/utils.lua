@@ -138,4 +138,19 @@ function M.insert_at_cursor(text)
   vim.api.nvim_put({text}, 'l', true, true)
 end
 
+--get list of available figures
+function M.list_figures(figures_dir)
+    local search_pattern = figures_dir .. "/*.svg"
+    local svg_files_list = vim.fn.glob(search_pattern, false, true)
+
+    local figures_list = {}
+
+    for _, filepath in ipairs(svg_files_list) do
+        local filename = vim.fn.fnamemodify(filepath, ":t:r")
+        table.insert(figures_list, filename)
+    end
+
+    return figures_list
+end
+
 return M

@@ -110,3 +110,25 @@ vim.api.nvim_create_user_command('LeXternCreate', function(opts)
     lextern.create_figure(title)
   end
 end, { nargs = '?' })
+
+-- Test list_figures
+vim.api.nvim_create_user_command('LeXternList', function()
+  local utils = require('lextern.utils')
+  local dir = utils.get_figures_dir()
+  
+  if not dir then
+    print("✗ No figures directory found")
+    return
+  end
+  
+  local figures = utils.list_figures(dir)
+  
+  if #figures == 0 then
+    print("No figures found in: " .. dir)
+  else
+    print("Figures found:")
+    for _, fig in ipairs(figures) do
+      print("  - " .. fig)
+    end
+  end
+end, { nargs = 0 })
