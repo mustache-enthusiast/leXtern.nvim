@@ -214,3 +214,16 @@ vim.api.nvim_create_user_command('LeXternTestRegister', function(opts)
   print('✓ Copied to register "')
   print('Try: press p to paste')
 end, { nargs = '?' })
+
+-- Preamble command
+vim.api.nvim_create_user_command('LeXternPreamble', function()
+  local lextern = require('lextern')
+  lextern.preamble()
+end, { nargs = 0 })
+
+
+-- Add figure command
+vim.api.nvim_create_user_command('LeXternAdd', function()
+  local lextern = require('lextern')
+  lextern.add_figure()
+end, { nargs = 0 })

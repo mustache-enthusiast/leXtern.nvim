@@ -76,7 +76,6 @@ function M.edit_figure()
             end
             local target_path = utils.figure_path(target_dir, target_file)
 
-            utils.open_inkscape(target_path)
             vim.notify("Opening " .. target_file, vim.log.levels.INFO)
             utils.open_inkscape(target_path)
 
@@ -90,6 +89,56 @@ function M.edit_figure()
             end
         end
     )
+end
+
+
+function M.add_figure()
+    
+    local target_dir = utils.get_figures_dir()
+    if not target_dir then
+        vim.notify("Error: target directory not found.", vim.log.levels.WARN)
+        return nil
+    end
+    
+    local figures_list = utils.list_figures(target_dir)
+    if #figures_list == 0 then
+        vim.notify("No figures found in: " .. target_dir, vim.log.levels.INFO)
+        return nil
+    end
+
+    vim.ui.select(figures_list,
+        { prompt = "Select a figure:" },
+        function(target_file, idx)
+            if not target_file then
+                return
+            end
+            local target_path = utils.figure_path(target_dir, target_file)
+
+            -- Copy figure code to register for easy pasting
+            local figure_env, err = utils.generate_figure_environment(target_file, target_file)
+            if figure_env then
+                utils.copy_to_register(figure_env)
+                vim.notify("Code copied to register - press 'p' to paste.", vim.log.levels.INFO)
+            else
+                vim.notify("Ccode generation failed: " .. err .. ")", vim.log.levels.WARN)
+            end
+        end
+    )
+end
+
+-- Copy LaTeX preamble to register
+function M.preamble()
+  local preamble_content, err = utils.get_template("preamble.tex")
+  
+  if not preamble_content then
+    vim.notify("Error: " .. err, vim.log.levels.ERROR)
+    return nil
+  end
+  
+  utils.copy_to_register(preamble_content)
+  vim.notify("Preamble copied to register - press 'p' to paste", vim.log.levels.INFO)
+  
+  return true
 end
 
 return M
