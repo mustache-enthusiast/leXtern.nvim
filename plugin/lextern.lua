@@ -32,4 +32,23 @@ vim.api.nvim_create_user_command('LexternPreamble', function()
   lextern.preamble()
 end, { nargs = 0 })
 
+-- Watch command
+vim.api.nvim_create_user_command('LexternWatch', function(opts)
+  local lextern = require('lextern')
+  local directory = opts.args ~= "" and opts.args or nil
+  lextern.start_watcher(directory)
+end, { nargs = '?' })
+
+-- Stop watch command
+vim.api.nvim_create_user_command('LexternWatchStop', function()
+  local lextern = require('lextern')
+  lextern.stop_watcher()
+end, { nargs = 0 })
+
+-- Status command
+vim.api.nvim_create_user_command('LexternStatus', function()
+  local lextern = require('lextern')
+  lextern.watcher_status()
+end, { nargs = 0 })
+
 

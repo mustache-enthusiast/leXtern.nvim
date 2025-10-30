@@ -1,5 +1,5 @@
 
-vim.api.nvim_create_user_command('lexternTestSanitize', function(opts)
+vim.api.nvim_create_user_command('LexternTestSanitize', function(opts)
   local utils = require('lextern.utils')
   local input = opts.args
   local result = utils.sanitize_filename(input)
@@ -13,7 +13,7 @@ end, { nargs = 1 })
 
 
 -- Test get_figures_dir
-vim.api.nvim_create_user_command('lexternTestFiguresDir', function()
+vim.api.nvim_create_user_command('LexternTestFiguresDir', function()
   local utils = require('lextern.utils')
   local dir = utils.get_figures_dir()
   
@@ -25,7 +25,7 @@ vim.api.nvim_create_user_command('lexternTestFiguresDir', function()
 end, { nargs = 0 })
 
 -- Test figure_path
-vim.api.nvim_create_user_command('lexternTestFiguresPath', function(opts)
+vim.api.nvim_create_user_command('LexternTestFiguresPath', function(opts)
   local utils = require('lextern.utils')
   local dir = utils.get_figures_dir()
   
@@ -48,12 +48,12 @@ end, { nargs = 1 })
 
 
 -- Test open_inkscape
-vim.api.nvim_create_user_command('lexternTestOpen', function(opts)
+vim.api.nvim_create_user_command('LexternTestOpen', function(opts)
   local utils = require('lextern.utils')
   
   local filepath = opts.args
   if filepath == "" then
-    print("Usage: :lexternTestOpen <filepath>")
+    print("Usage: :LexternTestOpen <filepath>")
     return
   end
   
@@ -62,7 +62,7 @@ vim.api.nvim_create_user_command('lexternTestOpen', function(opts)
 end, { nargs = 1 })
 
 -- Test insert_at_cursor
-vim.api.nvim_create_user_command('lexternTestInsert', function(opts)
+vim.api.nvim_create_user_command('LexternTestInsert', function(opts)
   local utils = require('lextern.utils')
   local text = opts.args
   
@@ -75,7 +75,7 @@ end, { nargs = '?' })  -- '?' = optional argument
 
 
 -- Test list_figures
-vim.api.nvim_create_user_command('lexternTestList', function()
+vim.api.nvim_create_user_command('LexternTestList', function()
   local utils = require('lextern.utils')
   local dir = utils.get_figures_dir()
   
@@ -98,12 +98,12 @@ end, { nargs = 0 })
 
 
 -- Test get_template
-vim.api.nvim_create_user_command('lexternTestGetTemplate', function(opts)
+vim.api.nvim_create_user_command('LexternTestGetTemplate', function(opts)
   local utils = require('lextern.utils')
   local template_name = opts.args
   
   if template_name == "" then
-    print("Usage: :lexternTestGetTemplate <template_name>")
+    print("Usage: :LexternTestGetTemplate <template_name>")
     print("Examples: template.svg, preamble.tex, figure.tex")
     return
   end
@@ -120,7 +120,7 @@ vim.api.nvim_create_user_command('lexternTestGetTemplate', function(opts)
 end, { nargs = 1 })
 
 -- Test write_template
-vim.api.nvim_create_user_command('lexternTestWriteTemplate', function()
+vim.api.nvim_create_user_command('LexternTestWriteTemplate', function()
   local utils = require('lextern.utils')
   local dest = "/tmp/lextern-test-output.txt"
   
@@ -135,7 +135,7 @@ vim.api.nvim_create_user_command('lexternTestWriteTemplate', function()
 end, { nargs = 0 })
 
 -- Test generate_figure_environment
-vim.api.nvim_create_user_command('lexternTestGenerateFigure', function(opts)
+vim.api.nvim_create_user_command('LexternTestGenerateFigure', function(opts)
   local utils = require('lextern.utils')
   
   -- Default test values
@@ -160,7 +160,7 @@ vim.api.nvim_create_user_command('lexternTestGenerateFigure', function(opts)
 end, { nargs = '?' })
 
 -- Test copy_to_register
-vim.api.nvim_create_user_command('lexternTestRegister', function(opts)
+vim.api.nvim_create_user_command('LexternTestRegister', function(opts)
   local utils = require('lextern.utils')
   local text = opts.args
   
@@ -172,3 +172,24 @@ vim.api.nvim_create_user_command('lexternTestRegister', function(opts)
   print('✓ Copied to register "')
   print('Try: press p to paste')
 end, { nargs = '?' })
+
+-- Test export function
+vim.api.nvim_create_user_command('LexternTestExport', function(opts)
+  local utils = require('lextern.utils')
+  local svg_path = opts.args
+  
+  if svg_path == "" then
+    print("Usage: :LexternTestExport <path-to-svg>")
+    return
+  end
+  
+  print("Exporting: " .. svg_path)
+  local success, err = utils.export_svg_to_pdf_latex(svg_path)
+  
+  if success then
+    print("✓ Export successful!")
+    print("  Check for .pdf and .pdf_tex files")
+  else
+    print("✗ Export failed: " .. err)
+  end
+end, { nargs = 1 })

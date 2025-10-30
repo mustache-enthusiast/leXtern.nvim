@@ -141,4 +141,59 @@ function M.preamble()
   return true
 end
 
+-- Start file watcher
+function M.start_watcher(directory)
+  local watcher = require('lextern.watcher')
+  
+  -- Auto-detect directory if not provided
+  if not directory then
+    directory = utils.get_figures_dir()
+    if not directory then
+      vim.notify("Error: Could not find figures directory", vim.log.levels.ERROR)
+      return nil
+    end
+  end
+  
+  local success, err = watcher.start_watch(directory)
+  
+  if not success then
+    vim.notify("Error: " .. err, vim.log.levels.ERROR)
+    return nil
+  end
+  
+  vim.notify(string.format("Watching: %s", directory), vim.log.levels.INFO)
+  return true
+end
+
+-- Stop file watcher
+function M.stop_watcher()
+  local watcher = require('lextern.watcher')
+  
+  local success, err = watcher.stop_watch()
+  
+  if not success then
+    vim.notify("Error: " .. err, vim.log.levels.WARN)
+    return nil
+  end
+  
+  vim.notify("Watcher stopped", vim.log.levels.INFO)
+  return true
+end
+
+-- Show watcher status
+function M.watcher_status()
+  local watcher = require('lextern.watcher')
+  local status = watcher.get_status()
+  
+  if not status.watching then
+    vim.notify("Watcher is not running", vim.log.levels.INFO)
+  else
+    vim.notify(string.format(
+      "Watching: %s\nExported files: %d",
+      status.directory,
+      status.num_exports
+    ), vim.log.levels.INFO)
+  end
+end
+
 return M

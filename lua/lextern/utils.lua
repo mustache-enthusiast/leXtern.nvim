@@ -181,4 +181,37 @@ function M.copy_to_register(text, register)
     vim.fn.setreg(register, text)
 end
 
+
+-- Export SVG to PDF+LaTeX using Inkscape
+-- Returns true on success, or nil + error message
+function M.export_svg_to_pdf_latex(svg_path)
+  -- Construct the export command
+  local cmd = string.format('inkscape "%s" --export-filename="%s" --export-latex',
+    svg_path,
+    svg_path:gsub("%.svg$", ".pdf")
+  )
+  
+  -- Execute the command
+  local output = vim.fn.system(cmd)
+  local exit_code = vim.v.shell_error
+  
+  if exit_code ~= 0 then
+    return nil, "Inkscape export failed: " .. output
+  end
+  
+  -- Verify both output files were created
+  local pdf_path = svg_path:gsub("%.svg$", ".pdf")
+  local pdf_tex_path = svg_path:gsub("%.svg$", ".pdf_tex")
+  
+  if vim.fn.filereadable(pdf_path) == 0 then
+    return nil, "PDF file not created: " .. pdf_path
+  end
+  
+  if vim.fn.filereadable(pdf_tex_path) == 0 then
+    return nil, "PDF_TEX file not created: " .. pdf_tex_path
+  end
+  
+  return true
+end
+
 return M
