@@ -61,6 +61,13 @@ function M.create_figure(title)
         return nil
     end
 
+    -- Store original caption in metadata
+    local meta_success = utils.write_svg_metadata(target_path, {caption = title})
+    if not meta_success then
+        -- Non-fatal: continue even if metadata write fails
+        vim.notify("Warning: Could not write caption metadata", vim.log.levels.WARN)
+    end
+
     if not utils.figure_exists(target_path) then
         vim.notify("Error: '" .. target_path .. "'  was not created.", vim.log.levels.ERROR)
         return nil
@@ -113,8 +120,12 @@ function M.edit_figure()
             utils.open_inkscape(target_path)
             ensure_watcher_running()
 
+            -- Try to read caption from metadata, fallback to filename
+            local metadata = utils.read_svg_metadata(target_path)
+            local caption = metadata.caption or target_file
+
             -- Copy figure code to register for easy pasting
-            local figure_env, err = utils.generate_figure_environment(target_file, target_file)
+            local figure_env, err = utils.generate_figure_environment(target_file, caption)
             if figure_env then
                 utils.copy_to_register(figure_env)
                 local watcher_started = ensure_watcher_running()
@@ -131,7 +142,7 @@ function M.edit_figure()
 end
 
 
-function M.add_figure()
+function M.insert_figure()
     
     local target_dir = utils.get_figures_dir()
     if not target_dir then
@@ -151,18 +162,23 @@ function M.add_figure()
             if not target_file then
                 return
             end
+        
+            -- Need this to read metadata
             local target_path = utils.figure_path(target_dir, target_file)
-
-            -- Copy figure code to register for easy pasting
-            local figure_env, err = utils.generate_figure_environment(target_file, target_file)
+        
+            -- Read caption from metadata
+            local metadata = utils.read_svg_metadata(target_path)
+            local caption = metadata.caption or target_file
+        
+            local figure_env, err = utils.generate_figure_environment(target_file, caption)
             if figure_env then
                 utils.copy_to_register(figure_env)
                 vim.notify("Code copied to register - press 'p' to paste.", vim.log.levels.INFO)
             else
-                vim.notify("Ccode generation failed: " .. err .. ")", vim.log.levels.WARN)
+                vim.notify("Code generation failed: " .. err, vim.log.levels.ERROR)
             end
         end
-    )
+)
 end
 
 -- Copy LaTeX preamble to register

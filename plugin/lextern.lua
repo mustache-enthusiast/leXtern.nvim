@@ -21,9 +21,9 @@ vim.api.nvim_create_user_command('LexternEdit', function()
 end, { nargs = 0 })
 
 -- Add figure command
-vim.api.nvim_create_user_command('LexternAdd', function()
+vim.api.nvim_create_user_command('LexternInsert', function()
   local lextern = require('lextern')
-  lextern.add_figure()
+  lextern.insert_figure()
 end, { nargs = 0 })
 
 -- Preamble command
