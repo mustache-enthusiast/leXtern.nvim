@@ -4,7 +4,35 @@ local utils = require('lextern.utils')
 
 function M.setup(opts)
   opts = opts or {}
-  print("leXtern.nvim loaded!")
+
+  -- Auto-stop watcher on exit
+vim.api.nvim_create_autocmd("VimLeavePre", {
+    callback = function()
+    local watcher = require('lextern.watcher')
+        if watcher.is_watching() then
+            watcher.stop_watch()
+         end
+    end,
+  })
+end
+
+-- Ensure watcher is running for current directory
+local function ensure_watcher_running()
+  local watcher = require('lextern.watcher')
+  
+  -- Check if already watching
+  if watcher.is_watching() then
+    return  -- Already running, nothing to do
+  end
+  
+  -- Auto-start watcher
+  local dir = utils.get_figures_dir()
+  if dir then
+    local success = watcher.start_watch(dir)
+    if success then
+      vim.notify("File watcher started for: " .. dir, vim.log.levels.INFO)
+    end
+  end
 end
 
 function M.create_figure(title)
@@ -49,6 +77,8 @@ function M.create_figure(title)
 
     utils.open_inkscape(target_path)
 
+    ensure_watcher_running()
+
     return true
 
 end
@@ -78,6 +108,7 @@ function M.edit_figure()
 
             vim.notify("Opening " .. target_file, vim.log.levels.INFO)
             utils.open_inkscape(target_path)
+            ensure_watcher_running()
 
             -- Copy figure code to register for easy pasting
             local figure_env, err = utils.generate_figure_environment(target_file, target_file)
