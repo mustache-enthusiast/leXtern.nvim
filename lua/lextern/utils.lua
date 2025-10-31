@@ -214,4 +214,90 @@ function M.export_svg_to_pdf_latex(svg_path)
   return true
 end
 
+-- Write metadata to SVG file
+-- metadata: table of key-value pairs (e.g., {caption = "text"})
+-- Returns true on success, or nil + error
+function M.write_svg_metadata(svg_path, metadata)
+  -- Read the SVG file
+  local file = io.open(svg_path, "r")
+  if not file then
+    return nil, "Could not open SVG file: " .. svg_path
+  end
+  local content = file:read("*all")
+  file:close()
+  
+  -- Build metadata XML
+  local meta_attrs = {}
+  for key, value in pairs(metadata) do
+    -- Escape XML entities
+    value = value:gsub("&", "&amp;")
+    value = value:gsub('"', "&quot;")
+    value = value:gsub("<", "&lt;")
+    value = value:gsub(">", "&gt;")
+    table.insert(meta_attrs, string.format('%s="%s"', key, value))
+  end
+  
+  local lextern_metadata = string.format(
+    '<lextern:data xmlns:lextern="https://github.com/lextern/lextern.nvim" %s />',
+    table.concat(meta_attrs, " ")
+  )
+  
+  -- Check if metadata section exists
+  if content:match("<metadata") then
+    -- Check if lextern metadata already exists
+    if content:match("<lextern:data") then
+      -- Replace existing lextern metadata
+      content = content:gsub("<lextern:data.-%/>", lextern_metadata)
+    else
+      -- Insert into existing metadata section
+      content = content:gsub("(<metadata[^>]*>)", "%1\n  " .. lextern_metadata)
+    end
+  else
+    -- Create new metadata section after opening <svg> tag
+    content = content:gsub("(<svg[^>]*>)", "%1\n<metadata>\n  " .. lextern_metadata .. "\n</metadata>")
+  end
+  
+  -- Write back to file
+  file = io.open(svg_path, "w")
+  if not file then
+    return nil, "Could not write to SVG file: " .. svg_path
+  end
+  file:write(content)
+  file:close()
+  
+  return true
+end
+
+-- Read metadata from SVG file
+-- Returns table of metadata, or empty table if none found
+function M.read_svg_metadata(svg_path)
+  local file = io.open(svg_path, "r")
+  if not file then
+    return {}
+  end
+  local content = file:read("*all")
+  file:close()
+  
+  -- Find lextern metadata
+  local lextern_tag = content:match("<lextern:data[^>]*/>")
+  if not lextern_tag then
+    return {}
+  end
+  
+  -- Parse attributes
+  local metadata = {}
+  for key, value in lextern_tag:gmatch('(%w+)="([^"]*)"') do
+    if key ~= "xmlns:lextern" then
+      -- Unescape XML entities
+      value = value:gsub("&quot;", '"')
+      value = value:gsub("&lt;", "<")
+      value = value:gsub("&gt;", ">")
+      value = value:gsub("&amp;", "&")
+      metadata[key] = value
+    end
+  end
+  
+  return metadata
+end
+
 return M

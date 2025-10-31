@@ -16,23 +16,23 @@ vim.api.nvim_create_autocmd("VimLeavePre", {
   })
 end
 
--- Ensure watcher is running for current directory
+-- Returns true if watcher was just started, false if already running
 local function ensure_watcher_running()
   local watcher = require('lextern.watcher')
   
   -- Check if already watching
   if watcher.is_watching() then
-    return  -- Already running, nothing to do
+    return false  -- Already running
   end
   
   -- Auto-start watcher
   local dir = utils.get_figures_dir()
   if dir then
     local success = watcher.start_watch(dir)
-    if success then
-      vim.notify("File watcher started for: " .. dir, vim.log.levels.INFO)
-    end
+    return success or false  -- Return true if started successfully
   end
+  
+  return false
 end
 
 function M.create_figure(title)
@@ -77,7 +77,10 @@ function M.create_figure(title)
 
     utils.open_inkscape(target_path)
 
-    ensure_watcher_running()
+    local watcher_started = ensure_watcher_running()
+    if watcher_started then
+        vim.notify("Figure created. Watcher started.", vim.log.levels.INFO)
+    end
 
     return true
 
@@ -114,7 +117,12 @@ function M.edit_figure()
             local figure_env, err = utils.generate_figure_environment(target_file, target_file)
             if figure_env then
                 utils.copy_to_register(figure_env)
-                vim.notify("Figure opened. Code copied to register - press 'p' to paste.", vim.log.levels.INFO)
+                local watcher_started = ensure_watcher_running()
+                if watcher_started then
+                    vim.notify("Figure opened. Code copied to register. Watcher started.", vim.log.levels.INFO)
+                else
+                    vim.notify("Figure opened. Code copied to register - press 'p' to paste.", vim.log.levels.INFO)
+                end
             else
                 vim.notify("Figure opened (code generation failed: " .. err .. ")", vim.log.levels.WARN)
             end

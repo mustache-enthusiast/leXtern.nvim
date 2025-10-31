@@ -193,3 +193,57 @@ vim.api.nvim_create_user_command('LexternTestExport', function(opts)
     print("✗ Export failed: " .. err)
   end
 end, { nargs = 1 })
+
+
+-- Test SVG metadata round-trip with Inkscape
+vim.api.nvim_create_user_command('LexternTestMetadata', function()
+  local utils = require('lextern.utils')
+  
+  -- Create test SVG from template
+  local test_svg = "/tmp/metadata-test.svg"
+  utils.write_template(test_svg, "template.svg")
+  
+  -- Write metadata
+  print("Writing metadata...")
+  local success = utils.write_svg_metadata(test_svg, {
+    caption = "Test Caption with $\\alpha$",
+    equation = "$e^{i\\pi} + 1 = 0$"
+  })
+  
+  if not success then
+    print("✗ Failed to write metadata")
+    return
+  end
+  
+  -- Read it back
+  print("Reading metadata...")
+  local meta = utils.read_svg_metadata(test_svg)
+  print("Caption: " .. (meta.caption or "NOT FOUND"))
+  print("Equation: " .. (meta.equation or "NOT FOUND"))
+  
+  -- Open in Inkscape
+  print("\nNow opening in Inkscape...")
+  print("1. Make a small change (draw something)")
+  print("2. Save and close")
+  print("3. Run :lexternTestMetadataVerify")
+  
+  utils.open_inkscape(test_svg)
+end, { nargs = 0 })
+
+-- Verify metadata survived Inkscape
+vim.api.nvim_create_user_command('LexternTestMetadataVerify', function()
+  local utils = require('lextern.utils')
+  local test_svg = "/tmp/metadata-test.svg"
+  
+  local meta = utils.read_svg_metadata(test_svg)
+  
+  if meta.caption and meta.equation then
+    print("✓ SUCCESS! Metadata survived Inkscape")
+    print("Caption: " .. meta.caption)
+    print("Equation: " .. meta.equation)
+  else
+    print("✗ FAILED! Metadata was lost")
+    print("Caption: " .. (meta.caption or "MISSING"))
+    print("Equation: " .. (meta.equation or "MISSING"))
+  end
+end, { nargs = 0 })
