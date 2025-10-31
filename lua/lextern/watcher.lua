@@ -55,15 +55,26 @@ local function on_change(err, filename, events)
   vim.schedule(function()
     local success, err = utils.export_svg_to_pdf_latex(svg_path)
     
-    if success then
-      vim.notify(string.format("Exported: %s", filename), vim.log.levels.INFO)
+    if not success then
+      vim.notify("Export failed for " .. filename .. ": " .. err, vim.log.levels.ERROR)
+      return
+    end
+    
+    -- Verify both output files were created
+    local pdf_path = svg_path:gsub("%.svg$", ".pdf")
+    local pdf_tex_path = svg_path:gsub("%.svg$", ".pdf_tex")
+    
+    if vim.fn.filereadable(pdf_path) == 1 and vim.fn.filereadable(pdf_tex_path) == 1 then
+      -- Success - use green highlight like VimTeX
+      vim.api.nvim_echo({{filename .. " ✓", "MoreMsg"}}, false, {})
     else
-      vim.notify(string.format("Export failed for %s: %s", filename, err), vim.log.levels.ERROR)
+      vim.notify("Export incomplete for " .. filename .. ": output files missing", vim.log.levels.WARN)
     end
   end)
 end
 
 -- Start watching a directory
+-- Returns true or nil + error message
 function M.start_watch(directory)
   -- Validate directory exists
   if vim.fn.isdirectory(directory) == 0 then
@@ -75,14 +86,14 @@ function M.start_watch(directory)
     if state.directory == directory then
       return nil, "Already watching: " .. directory
     else
-      return nil, "Already watching another directory: " .. state.directory
+      return nil, "Already watching different directory: " .. state.directory
     end
   end
   
   -- Create watcher handle
   local handle = vim.loop.new_fs_event()
   if not handle then
-    return nil, "Failed to create watcher handle"
+    return nil, "Failed to create filesystem watcher handle"
   end
   
   -- Start watching
@@ -90,7 +101,7 @@ function M.start_watch(directory)
   
   if not success then
     handle:close()
-    return nil, "Failed to start watcher: " .. (watch_err or "unknown error")
+    return nil, "Failed to start filesystem watcher: " .. (watch_err or "unknown error")
   end
   
   -- Update state
@@ -103,9 +114,10 @@ function M.start_watch(directory)
 end
 
 -- Stop watching
+-- Returns true or nil + error message
 function M.stop_watch()
   if not state.watching then
-    return nil, "Not currently watching"
+    return nil, "Watcher not currently running"
   end
   
   -- Stop and close the handle
