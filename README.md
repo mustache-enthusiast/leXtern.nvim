@@ -56,16 +56,16 @@ require('lextern').setup({
 ## Recommended Keybindings
 
 ```lua
-vim.keymap.set('n', '<localleader>lc', ':LexternCreate<CR>', 
+vim.keymap.set('n', '<localleader>fc', ':LexternCreate<CR>', 
   vim.tbl_extend('force', opts, { desc = 'Create figure' }))
-vim.keymap.set('v', '<localleader>lc', '"zy:LexternCreate <C-r>z<CR>', 
+vim.keymap.set('v', '<localleader>fc', '"zy:LexternCreate <C-r>z<CR>', 
   vim.tbl_extend('force', opts, { desc = 'Create figure from selection' }))
-vim.keymap.set('n', '<localleader>le', ':LexternEdit<CR>', 
+vim.keymap.set('n', '<localleader>fe', ':LexternEdit<CR>', 
   vim.tbl_extend('force', opts, { desc = 'Edit figure' }))
-vim.keymap.set('n', '<localleader>li', ':LexternInsert<CR>', 
+vim.keymap.set('n', '<localleader>fi', ':LexternInsert<CR>', 
   vim.tbl_extend('force', opts, { desc = 'Insert figure code' }))
-vim.keymap.set('n', '<localleader>lp', ':LexternPreamble<CR>', 
-  vim.tbl_extend('force', opts, { desc = 'Insert preamble' }))
+vim.keymap.set('n', '<localleader>fp', ':LexternPreamble<CR>', 
+  vim.tbl_extend('force', opts, { desc = 'Insert preamble' }))vim.keymap.set('n', '<localleader>fc', ':LexternCreate<CR>', opts)
 ```
 
 ## Usage
