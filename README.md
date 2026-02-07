@@ -23,10 +23,35 @@ Inspired by [Gilles Castel](https://castel.dev/), whose articles on [taking lect
 Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 
 ```lua
-require {
+{
   'mustache-enthusiast/lextern.nvim',
+  config = function()
+    require('lextern').setup({
+      -- Directory creation behavior when figures/ doesn't exist
+      -- "ask" (default): Prompt user whether to create directory
+      -- "always": Automatically create directory without asking
+      -- "never": Display error and stop (old behavior)
+      dir_create_mode = "ask",
+    })
+  end,
 }
 ```
+
+## Configuration
+
+leXtern can be configured by passing options to the `setup()` function:
+
+```lua
+require('lextern').setup({
+  dir_create_mode = "ask",  -- "ask" | "always" | "never"
+})
+```
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `dir_create_mode` | string | `"ask"` | Controls what happens when the `figures/` directory doesn't exist:<br>• `"ask"` - Prompt user with confirmation dialog (default)<br>• `"always"` - Automatically create directory and notify<br>• `"never"` - Display error message and stop |
 
 ## Recommended Keybindings
 

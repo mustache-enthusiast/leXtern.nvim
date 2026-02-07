@@ -43,24 +43,86 @@ function M.sanitize_filename(title)
     return result
 end
 
--- Get the figures directory path
+-- Ensure directory exists, creating it if needed based on config
+-- Returns true or nil + error message
+function M.ensure_directory_exists(directory)
+    -- Check if directory already exists
+    if vim.fn.isdirectory(directory) == 1 then
+        return true
+    end
+
+    -- Get config from main module
+    local lextern = require('lextern')
+    local mode = lextern.config.dir_create_mode
+
+    -- Handle based on mode
+    if mode == "never" then
+        return nil, "Directory does not exist: " .. directory
+    elseif mode == "always" then
+        -- Create directory automatically
+        local success = vim.fn.mkdir(directory, "p")
+        if success == 0 then
+            return nil, "Failed to create directory: " .. directory
+        end
+        vim.notify("Created figures directory: " .. directory, vim.log.levels.INFO)
+        return true
+    elseif mode == "ask" then
+        -- Ask user whether to create
+        local response = vim.fn.confirm(
+            "Figures directory does not exist:\n" .. directory .. "\n\nCreate it?",
+            "&Yes\n&No",
+            1  -- Default to Yes
+        )
+
+        if response == 1 then
+            -- User chose Yes
+            local success = vim.fn.mkdir(directory, "p")
+            if success == 0 then
+                return nil, "Failed to create directory: " .. directory
+            end
+            vim.notify("Created figures directory: " .. directory, vim.log.levels.INFO)
+            return true
+        else
+            -- User chose No
+            return nil, "Directory creation cancelled by user"
+        end
+    else
+        return nil, "Invalid dir_create_mode configuration: " .. tostring(mode)
+    end
+end
+
+-- Get the figures directory path and ensure it exists
 -- Returns absolute path or nil + error message
 function M.get_figures_dir()
     -- Try vimtex root first
     if vim.b.vimtex and vim.b.vimtex.root then
         local vimtex_root = vim.b.vimtex.root
         local figures_path = vim.fn.fnamemodify(vimtex_root .. "/figures", ":p")
+
+        -- Ensure directory exists
+        local success, err = M.ensure_directory_exists(figures_path)
+        if not success then
+            return nil, err
+        end
+
         return figures_path
     end
-    
+
     -- Fall back to current file's directory
     local current_file = vim.fn.expand("%:p")
     if current_file == "" then
         return nil, "No figures directory found: no file currently open"
     end
-    
+
     local current_dir = vim.fn.fnamemodify(current_file, ":h")
     local figures_path = vim.fn.fnamemodify(current_dir .. "/figures", ":p")
+
+    -- Ensure directory exists
+    local success, err = M.ensure_directory_exists(figures_path)
+    if not success then
+        return nil, err
+    end
+
     return figures_path
 end
 

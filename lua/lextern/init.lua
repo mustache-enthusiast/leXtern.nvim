@@ -1,9 +1,18 @@
 local M = {}
 local utils = require('lextern.utils')
 
+-- Default configuration
+M.config = {
+  -- Directory creation behavior: "ask" (default), "always", "never"
+  dir_create_mode = "ask",
+}
+
 function M.setup(opts)
   opts = opts or {}
-  
+
+  -- Merge user config with defaults
+  M.config = vim.tbl_deep_extend("force", M.config, opts)
+
   -- Auto-stop watcher on exit
   vim.api.nvim_create_autocmd("VimLeavePre", {
     callback = function()
