@@ -1,3 +1,6 @@
+> [!WARNING]
+> This project is defunct and no longer maintained. It may still be freely forked or copied in accordance with the MIT license but will receive no further updates or support from the original plugin author.
+
 # leXtern.nvim
 
 A Neovim plugin for creating and managing SVG figures in LaTeX documents using Inkscape.
